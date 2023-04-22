@@ -1,47 +1,28 @@
 import fs from "fs";
 import path from "path";
 import { Collection } from "discord.js";
+import { Command, FileCommand } from "./types/command.js";
+import { fileURLToPath, pathToFileURL } from "url";
+
 /**
  * Gets every commands inside the selected directory folder.
  * @param directory - the directory of your command folder
  */
-export function build (directory: string) {
+export async function build (directory: string, log?: boolean) {
   const commands = new Collection<string, Command>();
-  const foldersPath = path.join(__dirname, directory);
-  const commandFolders = fs.readdirSync(foldersPath);
+  const commandFiles = fs.readdirSync(path.resolve(`./src/${directory}`));
 
-  for (const folder of commandFolders) {
-    const commandPath = path.join(foldersPath, folder);
-    const commandFiles = returnAllFilenamesfromFolder(commandPath);
-    importAllFromCommandFiles(commands, commandFiles, commandPath);
+  for (const files of commandFiles) {
+    const filePath = `./commands/${files}`;
+    const command: FileCommand = await import(filePath);
+    if (log) {
+      console.log(`[INFO] Importing ./commands/${files}`);
+    }
+    setProperties(commands, command.command, filePath);
   }
   return commands;
 }
 
-function returnAllFilenamesfromFolder (
-  commandPath: string,
-) {
-  const commandFiles = fs
-    .readdirSync(commandPath)
-    .filter(file => file.endsWith(".ts"));
-
-  return commandFiles;
-}
-
-// impure function loll
-function importAllFromCommandFiles (
-  commandCollection: Collection<string, Command>,
-  commandFiles: string[],
-  commandPath: string,
-) {
-  for (const folder of commandFiles) {
-    const filePath = path.join(commandPath, folder);
-    import(filePath)
-      .then((command: Command) => {
-        setProperties(commandCollection, command, filePath);
-      });
-  }
-}
 
 function setProperties (
   commands: Collection<string, Command>, 

@@ -11,7 +11,9 @@ const client = new Client({
   ] 
 });
 
-build("commands");
+const commands = await build("commands", true);
+
+commands.get("ping")?.execute();
 /*
 client.once(Events.ClientReady, c => {
   console.log(`Logged in as ${c.user.tag}`);
