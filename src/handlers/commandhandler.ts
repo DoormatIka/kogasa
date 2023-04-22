@@ -1,4 +1,4 @@
-import {Collection, Message} from "discord.js";
+import {ChannelType, Collection, Message} from "discord.js";
 import {Command} from "../types/command.js";
 
 export async function handleCommands (
@@ -12,8 +12,9 @@ export async function handleCommands (
     const userCmmd: string | undefined = arrayedMessage.at(0);
     const selected = commands.get(userCmmd ?? "");
 
-    if (selected) {
-      await selected.execute(msg);
+    arrayedMessage.shift();
+    if (selected && msg.channel.type === ChannelType.GuildText) {
+      await selected.execute(msg, msg.channel, arrayedMessage);
     }
   }
 }

@@ -35,6 +35,9 @@
         "no-extra-semi": "error",
         "no-multiple-empty-lines": "error",
         "max-statements-per-line": ["error", { "max": 1 }],
-        "max-lines-per-function": ["error", 20]
+        "max-lines-per-function": ["error", 20],
+        "no-await-in-loop": "error",
+        "eqeqeq": "error",
+        "no-loop-func": "error"
     }
 }

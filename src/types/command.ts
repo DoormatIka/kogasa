@@ -1,4 +1,4 @@
-import {Message} from "discord.js";
+import {GuildChannel, Message, TextChannel} from "discord.js";
 
 export type Command = {
   data: {
@@ -6,7 +6,7 @@ export type Command = {
     description: string,
     usage: string,
   },
-  execute: (msg: Message) => Promise<void>
+  execute: (msg: Message, channel: TextChannel, args: Array<string>) => Promise<void>
 }
 
 export type FileCommand = {
