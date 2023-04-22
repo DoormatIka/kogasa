@@ -1,8 +1,10 @@
+import {Message} from "discord.js";
+
 export type Command = {
   data: {
     name: string
   },
-  execute: () => Promise<void>
+  execute: (msg: Message) => Promise<void>
 }
 
 export type FileCommand = {
