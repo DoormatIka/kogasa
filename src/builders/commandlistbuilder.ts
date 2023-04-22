@@ -11,11 +11,11 @@ export async function build (directory: string, log?: boolean) {
   const commands = new Collection<string, Command>();
   const commandFiles = fs.readdirSync(path.resolve(`./src/${directory}`));
 
-  for (const files of commandFiles) {
+  for (const files of commandFiles) { 
     const filePath = `../commands/${files}`;
     const command: FileCommand = await import(filePath);
     if (log) {
-      console.log(`[INFO] Importing ../commands/${files}`);
+      console.log(`[INFO] Importing ${filePath}`);
     }
     setProperties(commands, command.command, filePath);
   }
