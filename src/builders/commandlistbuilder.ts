@@ -8,18 +8,22 @@ import { Command, FileCommand } from "../types/command.js";
  * @param directory - the directory of your command folder
  */
 export async function build (directory: string, log?: boolean) {
-  const commands = new Collection<string, Command>();
+  const commandCollection = new Collection<string, Command>();
   const commandFiles = fs.readdirSync(path.resolve(`./src/${directory}`));
-
+  
+  const pendingCommands: Array<Promise<FileCommand>> = [];
   for (const files of commandFiles) { 
     const filePath = `../commands/${files}`;
-    const command: FileCommand = await import(filePath);
+    pendingCommands.push(import(filePath));
     if (log) {
       console.log(`[INFO] Importing ${filePath}`);
     }
-    setProperties(commands, command.command, filePath);
   }
-  return commands;
+  const importedCommands = await Promise.all(pendingCommands);
+  importedCommands.forEach(commands => 
+    setProperties(commandCollection, commands.command, commands.command.data.name));
+
+  return commandCollection;
 }
 
 function setProperties (

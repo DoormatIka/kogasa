@@ -23,8 +23,20 @@ const helpCommands = commands.map((command) => {
 });
 const helpText = handleHelp(helpCommands);
 
-client.once(Events.ClientReady, c => {
+client.once(Events.ClientReady, async c => {
   console.log(`Logged in as ${c.user.tag}`);
+  /*
+  const union_guild = c.guilds.cache.get("1093805905872687174")!;
+  const union_no_mic = c.channels.cache.get("1093810998202343444")!;
+  const res = [...(await union_guild.members.fetch())!.values()];
+  
+  setInterval(() => {
+    const member = res[Math.floor(Math.random() * res.length)];
+    if (union_no_mic.isTextBased()) {
+      union_no_mic.send(`<@${member.id}> Take a fucking shower you stinky harlot.`);
+    }
+  }, 10000);
+  */
 });
 client.on(Events.MessageCreate, async msg => {
   if (msg.channel.type === ChannelType.GuildText) {

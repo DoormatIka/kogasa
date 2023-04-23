@@ -1,4 +1,4 @@
-import {GuildChannel, Message, TextChannel} from "discord.js";
+import {Message, TextChannel} from "discord.js";
 
 export type Command = {
   data: {
