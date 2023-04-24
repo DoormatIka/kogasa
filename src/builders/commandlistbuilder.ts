@@ -7,35 +7,29 @@ import { Command, FileCommand } from "../types/command.js";
  * Gets every commands inside the selected directory folder.
  * @param directory - the directory of your command folder
  */
-export async function build (directory: string, log?: boolean) {
-  const commandCollection = new Collection<string, Command>();
+export async function build<T> (directory: string, log?: boolean) {
   const commandFiles = fs.readdirSync(path.resolve(`./src/${directory}`));
   
-  const pendingCommands: Array<Promise<FileCommand>> = [];
+  const pendingCommands: Array<Promise<T>> = [];
   for (const files of commandFiles) { 
-    const filePath = `../commands/${files}`;
+    const filePath = `../${directory}/${files}`;
     pendingCommands.push(import(filePath));
     if (log) {
       console.log(`[INFO] Importing ${filePath}`);
     }
   }
   const importedCommands = await Promise.all(pendingCommands);
-  importedCommands.forEach(commands => 
-    setProperties(commandCollection, commands.command, commands.command.data.name));
-
-  return commandCollection;
+  return importedCommands;
 }
 
-function setProperties (
-  commands: Collection<string, Command>, 
-  command: Command, 
-  filePath: string
-) {
-  if ("data" in command && "execute" in command) {
-    commands.set(command.data.name, command);
-  } else {
-    console.log(`[WARN] command at ${filePath} is missing properties.`);
+export function setCommandItems (importedCommands: FileCommand[]) {
+  const commands = new Collection<string, Command>();
+  for (const importedCommand of importedCommands) {
+    if ("data" in importedCommand.command && "execute" in importedCommand.command) {
+      commands.set(importedCommand.command.data.name, importedCommand.command);
+    } else {
+      console.log(`[WARN] command at ${importedCommand.command} is missing properties.`);
+    }
   }
+  return commands;
 }
-
-
