@@ -1,6 +1,6 @@
 import booru from "booru";
 import {Message, TextChannel} from "discord.js";
-import {readDanbooruTags} from "../lib/fuzzy.js";
+import {readDanbooruTags} from "../lib/danboorureader.js";
 import {Command} from "../types/command.js";
 import fuzzyset from "fuzzyset";
 

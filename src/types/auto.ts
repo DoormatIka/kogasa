@@ -9,3 +9,4 @@ export type AutoCommand = {
 export type FileAutoCommand = {
   auto: AutoCommand
 }
+
