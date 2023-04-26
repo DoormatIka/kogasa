@@ -25,7 +25,9 @@ export const command: Command = {
 
 function parseCommands (args: string[]) { 
   const { booleanMatches, optionMatches } = parsee(args);
-  const isFilterEnabled = booleanMatches.find(c => c === "--enablensfw");
+  const isFilterDisabled = booleanMatches.find(c => c === "--enablensfw") ? true : false;
+  const isFilterEnabled = booleanMatches.find(c => c === "--disablensfw") ? true : false;
+
   const sexy_limit = optionMatches.find(c => c[0] === "sexy_limit");
   const hentai_limit = optionMatches.find(c => c[0] === "hentai_limit");
   const porn_limit = optionMatches.find(c => c[0] === "porn_limit");
@@ -34,7 +36,7 @@ function parseCommands (args: string[]) {
       sexy_limit: sexy_limit ? parseInt(sexy_limit[1], 10) : undefined,
       hentai_limit: hentai_limit ? parseInt(hentai_limit[1], 10) : undefined,
       porn_limit: porn_limit ? parseInt(porn_limit[1], 10) : undefined,
-      enablensfwfilter: isFilterEnabled ? true : false,
+      enablensfwfilter: isFilterEnabled || isFilterDisabled,
     }
   };
 }
