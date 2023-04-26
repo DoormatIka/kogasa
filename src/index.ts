@@ -4,8 +4,9 @@ import { build, setCommandItems } from "./builders/commandlistbuilder.js";
 import { handleCommands } from "./handlers/commandhandler.js";
 import { handleHelp } from "./handlers/help.js";
 import {handleAuto} from "./handlers/autohandler.js";
-import {Command, FileCommand} from "./types/command.js";
-import {AutoCommand, FileAutoCommand} from "./types/auto.js";
+import {FileCommand} from "./types/command.js";
+import {FileAutoCommand} from "./types/auto.js";
+import Pocketbase from "pocketbase";
 dotenv.config();
 
 const client = new Client({ 
@@ -17,10 +18,11 @@ const client = new Client({
   ] 
 });
 
+const pocketbase = new Pocketbase("http://127.0.0.1:8090");
+
 const commands = setCommandItems(await build<FileCommand>("commands", true));
 const autoTextCommands = (await build<FileAutoCommand>("autocommands", true))
   .map(v => v.auto);
-
 const helpCommands = commands.map((command) => {
   const devmode = command.data.devMode ? " (Dev Only)" : "";
   return { usage: command.data.usage, description: `${command.data.description}${devmode}` };
@@ -48,7 +50,7 @@ client.on(Events.MessageCreate, async msg => {
       msg.reply(helpText);
       return;
     }
-    handleCommands(msg, commands, process.env.DEVID!);
+    handleCommands(msg, commands, process.env.DEVID!, pocketbase);
     await handleAuto(msg, msg.channel, autoTextCommands, []);
   }
 });
