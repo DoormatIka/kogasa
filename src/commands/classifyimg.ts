@@ -16,9 +16,6 @@ export const command: Command = {
   },
   async execute (msg) {
     await msg.channel.sendTyping();
-    if (await checker(msg)) {
-      return;
-    }
     const res = [];
     if (msg.attachments.size >= 1) {
       res.push(...await attachmentClassifier(msg));
@@ -29,14 +26,6 @@ export const command: Command = {
     await msg.reply(`Res: ${res.join("\n\n")} | Sent attachments: ${msg.attachments.size}`);
   },
 };
-
-async function checker (msg: Message): Promise<boolean> {
-  if (msg.author.id !== "509683395224141827") {
-    await msg.reply("This is still in development! Dev-only.");
-    return true;
-  }
-  return false;
-}
 
 async function attachmentClassifier (msg: Message) {
   const axiosBuffers = await getAttachments(msg);

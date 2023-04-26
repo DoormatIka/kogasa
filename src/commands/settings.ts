@@ -5,23 +5,14 @@ export const command: Command = {
     name: "nsfwsetting",
     description: "Sets the NSFW filter. (Not working yet.)",
     usage: "nsfwsetting [--enablensfw|--disablensfw] [sexy_limit:number] [hentai_limit:number] [porn_limit:number]",
-    devMode: false,
+    devMode: true,
   },
   async execute (msg) {
     await msg.channel.sendTyping();
-    setTimeout(() => msg.channel.send("It's kinda working."), 1000);
+    await msg.reply(JSON.stringify(parsee(msg.content), undefined, 2));
   },
 };
 
-const discordCommand = "??setting --enablensfw sexy_limit:5 hentai_limit:5";
-
-const parsed = parsee(discordCommand);
-
-for (const optionMatch of parsed.optionMatches) {
-  const option = optionMatch[0];
-  const param = optionMatch[1];
-
-}
 
 /**
   * Parses settings.
