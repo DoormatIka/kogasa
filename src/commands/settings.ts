@@ -12,13 +12,18 @@ export const command: Command = {
   async execute (msg, channel, args, pb) {
     await msg.channel.sendTyping();
     const settings = parseCommands(args);
+    if (settings.errors.nsfwfilter) {
+      await msg.reply("Something went wrong parsing your command.");
+      return;
+    }
+
     const record = await PB.fetchServerRecord(pb, channel.guild.id);
     if (record.items.length < 1) {
       await PB.addServer(pb, channel.guild.id, settings);
-      await msg.reply(`Added ${settings.nsfwfiltersettings} on ${channel.guild.id}`);
+      await msg.reply(`Added ${JSON.stringify(settings.nsfwfiltersettings)} on ${channel.guild.id}`);
     } else {
       await PB.setSettings(pb, record, settings);
-      await msg.reply(`Set ${settings.nsfwfiltersettings} on ${channel.guild.id}`);
+      await msg.reply(`Set ${JSON.stringify(settings.nsfwfiltersettings)} on ${channel.guild.id}`);
     }
   },
 };
@@ -26,7 +31,7 @@ export const command: Command = {
 function parseCommands (args: string[]) { 
   const { booleanMatches, optionMatches } = parsee(args);
   const isFilterDisabled = booleanMatches.find(c => c === "--enablensfw") ? true : false;
-  const isFilterEnabled = booleanMatches.find(c => c === "--disablensfw") ? true : false;
+  const isFilterEnabled = booleanMatches.find(c => c === "--disablensfw") ? true : false; // bugged.
 
   const sexy_limit = optionMatches.find(c => c[0] === "sexy_limit");
   const hentai_limit = optionMatches.find(c => c[0] === "hentai_limit");
@@ -37,6 +42,25 @@ function parseCommands (args: string[]) {
       hentai_limit: hentai_limit ? parseInt(hentai_limit[1], 10) : undefined,
       porn_limit: porn_limit ? parseInt(porn_limit[1], 10) : undefined,
       enablensfwfilter: isFilterEnabled || isFilterDisabled,
+    },
+    errors: {
+      nsfwfilter: validateParameters(sexy_limit, hentai_limit, porn_limit)
     }
   };
+}
+
+function validateParameters (
+  sexy_limit?: string[],
+  hentai_limit?: string[], 
+  porn_limit?: string[]
+) {
+  if (sexy_limit && parseInt(sexy_limit[1]) > 100) {
+    return true;
+  }
+  if (hentai_limit && parseInt(hentai_limit[1]) > 100) {
+    return true;
+  }
+  if (porn_limit && parseInt(porn_limit[1]) > 100) {
+    return true;
+  }
 }
