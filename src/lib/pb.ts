@@ -31,6 +31,12 @@ export async function setSettings (serverID: string, setting: Settings) {
   }
 }
 
+export async function getSettings (serverID: string) {
+  const server = await fetchServerRecord(serverID);
+  return await pb.collection("nsfwfiltersettings")
+    .getOne(server.items[0].nsfwfiltersettings);
+}
+
 async function createDefaultSettings (setting?: Settings) {
   const defaultSettings: Settings = {
     nsfwfiltersettings: {
