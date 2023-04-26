@@ -4,7 +4,8 @@ export const command: Command = {
   data: { 
     name: "ping",
     description: "Pings you, I promise!",
-    usage: "ping [user]"
+    usage: "ping [user]",
+    devMode: false,
   },
   async execute (msg) {
     await msg.channel.sendTyping();

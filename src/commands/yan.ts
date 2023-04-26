@@ -11,7 +11,8 @@ export const command: Command = {
   data: {
     name: "dansearch",
     description: "Searches danbooru for images.",
-    usage: "dansearch --autotag [tags]"
+    usage: "dansearch --autotag [tags]",
+    devMode: false,
   },
   async execute (msg, channel, args) {
     await channel.sendTyping();

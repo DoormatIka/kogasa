@@ -4,7 +4,8 @@ export const command: Command = {
   data: { 
     name: "nsfwsetting",
     description: "Sets the NSFW filter. (Not working yet.)",
-    usage: "setting [--enablensfw|--disablensfw] [sexy_limit:number] [hentai_limit:number] [porn_limit:number]"
+    usage: "nsfwsetting [--enablensfw|--disablensfw] [sexy_limit:number] [hentai_limit:number] [porn_limit:number]",
+    devMode: false,
   },
   async execute (msg) {
     await msg.channel.sendTyping();
@@ -14,8 +15,22 @@ export const command: Command = {
 
 const discordCommand = "??setting --enablensfw sexy_limit:5 hentai_limit:5";
 
-console.log(parsee(discordCommand));
+const parsed = parsee(discordCommand);
 
+for (const optionMatch of parsed.optionMatches) {
+  const option = optionMatch[0];
+  const param = optionMatch[1];
+
+}
+
+/**
+  * Parses settings.
+  * 
+  * @param cmd - discord command
+  * @returns
+  *   - booleanMatches => a string[] that has every enable options
+  *   - optionMatches => a string[][] that has every option and their parameters
+  */
 function parsee (cmd: string): { booleanMatches: string[], optionMatches: string[][] } {
   const parsed = cmd.split(" ");
   parsed.shift();
