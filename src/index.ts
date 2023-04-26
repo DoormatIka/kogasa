@@ -22,7 +22,7 @@ const autoTextCommands = (await build<FileAutoCommand>("autocommands", true))
   .map(v => v.auto);
 
 const helpCommands = commands.map((command) => {
-  const devmode = command.data.devMode ? "(Dev Only)" : "";
+  const devmode = command.data.devMode ? " (Dev Only)" : "";
   return { usage: command.data.usage, description: `${command.data.description}${devmode}` };
 });
 const helpText = handleHelp(helpCommands);

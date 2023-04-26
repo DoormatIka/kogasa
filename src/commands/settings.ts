@@ -7,9 +7,12 @@ export const command: Command = {
     usage: "nsfwsetting [--enablensfw|--disablensfw] [sexy_limit:number] [hentai_limit:number] [porn_limit:number]",
     devMode: true,
   },
-  async execute (msg) {
+  async execute (msg, _, args) {
     await msg.channel.sendTyping();
-    await msg.reply(JSON.stringify(parsee(msg.content), undefined, 2));
+    const parsed = parsee(args);
+    for (const options of parsed.optionMatches) {
+      
+    }
   },
 };
 
@@ -22,13 +25,11 @@ export const command: Command = {
   *   - booleanMatches => a string[] that has every enable options
   *   - optionMatches => a string[][] that has every option and their parameters
   */
-function parsee (cmd: string): { booleanMatches: string[], optionMatches: string[][] } {
-  const parsed = cmd.split(" ");
-  parsed.shift();
+function parsee (args: string[]): { booleanMatches: string[], optionMatches: string[][] } {
   const optionMatches: string[][] = [];
   const booleanMatches: string[] = [];
-  for (let index = 0; index < parsed.length; index++) {
-    const parse = parsed[index];
+  for (let index = 0; index < args.length; index++) {
+    const parse = args[index];
     parseBooleanAndOption(parse, optionMatches, booleanMatches);
   }
 
