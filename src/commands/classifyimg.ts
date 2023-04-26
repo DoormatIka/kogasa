@@ -11,7 +11,8 @@ export const command: Command = {
   data: { 
     name: "classifyimg",
     description: "Classifies an image if it's NSFW or not.",
-    usage: "classifyimg {image}"
+    usage: "classifyimg {image}",
+    devMode: true,
   },
   async execute (msg) {
     await msg.channel.sendTyping();

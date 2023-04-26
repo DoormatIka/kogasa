@@ -5,6 +5,7 @@ export type Command = {
     name: string,
     description: string,
     usage: string,
+    devMode: boolean,
   },
   execute: (msg: Message, channel: TextChannel, args: Array<string>) => Promise<void>
 }
