@@ -22,7 +22,8 @@ const autoTextCommands = (await build<FileAutoCommand>("autocommands", true))
   .map(v => v.auto);
 
 const helpCommands = commands.map((command) => {
-  return { usage: command.data.usage, description: command.data.description };
+  const devmode = command.data.devMode ? "(Dev Only)" : "";
+  return { usage: command.data.usage, description: `${command.data.description}${devmode}` };
 });
 const helpText = handleHelp(helpCommands);
 
@@ -47,7 +48,7 @@ client.on(Events.MessageCreate, async msg => {
       msg.reply(helpText);
       return;
     }
-    handleCommands(msg, commands);
+    handleCommands(msg, commands, process.env.DEVID!);
     await handleAuto(msg, msg.channel, autoTextCommands, []);
   }
 });
