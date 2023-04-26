@@ -8,12 +8,10 @@ type Settings = {
   }
 }
 
-const pb = new Pocketbase("http://127.0.0.1:8090");
-
-export async function addServer (serverID: string, settings?: Settings) {
-  const server = await fetchServerRecord(serverID);
+export async function addServer (pb: Pocketbase, serverID: string, settings?: Settings) {
+  const server = await fetchServerRecord(pb, serverID);
   if (server.totalItems < 1) {
-    const nsfwfiltersettings = await createDefaultSettings(settings);
+    const nsfwfiltersettings = await createDefaultSettings(pb, settings);
     await pb.collection("server").create({
       serverid: serverID,
       nsfwfiltersettings: nsfwfiltersettings.id,
@@ -21,8 +19,8 @@ export async function addServer (serverID: string, settings?: Settings) {
   }
 }
 
-export async function setSettings (serverID: string, setting: Settings) {
-  const server = await fetchServerRecord(serverID);
+export async function setSettings (pb: Pocketbase, serverID: string, setting: Settings) {
+  const server = await fetchServerRecord(pb, serverID);
   const nsfwsettingID = server.items[0].nsfwfiltersettings;
   if (server.totalItems >= 1) {
     await pb
@@ -31,13 +29,13 @@ export async function setSettings (serverID: string, setting: Settings) {
   }
 }
 
-export async function getSettings (serverID: string) {
-  const server = await fetchServerRecord(serverID);
+export async function getSettings (pb: Pocketbase, serverID: string) {
+  const server = await fetchServerRecord(pb, serverID);
   return await pb.collection("nsfwfiltersettings")
     .getOne(server.items[0].nsfwfiltersettings);
 }
 
-async function createDefaultSettings (setting?: Settings) {
+async function createDefaultSettings (pb: Pocketbase, setting?: Settings) {
   const defaultSettings: Settings = {
     nsfwfiltersettings: {
       enablensfwfilter: false,
@@ -52,20 +50,10 @@ async function createDefaultSettings (setting?: Settings) {
   return nsfwfiltersettings;
 }
 
-async function fetchServerRecord (serverID: string) {
+async function fetchServerRecord (pb: Pocketbase, serverID: string) {
   return await pb
     .collection("server")
     .getList(1, 1, {
       filter: `serverid="${serverID}"`
     });
 }
-
-const servID = "967277089692745760 0";
-await addServer(servID);
-await setSettings(servID, {
-  nsfwfiltersettings: {
-    sexy_limit: 30,
-    porn_limit: 10,
-    enablensfwfilter: true
-  }
-});
