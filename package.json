@@ -19,6 +19,7 @@
     "fuzzyset": "^1.0.7",
     "fuzzysort": "^2.0.4",
     "nsfwjs": "^2.4.2",
+    "pocketbase": "^0.14.0",
     "sharp": "^0.32.0"
   },
   "devDependencies": {
