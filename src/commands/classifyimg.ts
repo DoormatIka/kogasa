@@ -57,7 +57,9 @@ function getEmbeds (msg: Message) {
   const axiosPromises = [];
   for (const embed of msg.embeds) {
     if (embed.image) {
-      axiosPromises.push(axios(embed.image.url, { responseType: "arraybuffer" }));
+      if (embed.thumbnail) {
+        axiosPromises.push(axios(embed.thumbnail.url, { responseType: "arraybuffer" }));
+      }
     }
   }
   return Promise.all(axiosPromises);
