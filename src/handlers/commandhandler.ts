@@ -1,10 +1,12 @@
 import {ChannelType, Collection, Message} from "discord.js";
 import {Command} from "../types/command.js";
+import Pocketbase from "pocketbase";
 
 export async function handleCommands (
   msg: Message,
   commands: Collection<string, Command>,
-  devID: string
+  devID: string,
+  pocketbase: Pocketbase
 ) {
   if (msg.content.startsWith("??")) {
     const arrayedMessage = msg.content
@@ -14,7 +16,7 @@ export async function handleCommands (
     const selected = commands.get(userCmmd ?? "");
 
     arrayedMessage.shift();
-    handleExecution(msg, selected, devID, arrayedMessage);
+    handleExecution(msg, selected, devID, arrayedMessage, pocketbase);
   }
 }
 
@@ -23,6 +25,7 @@ async function handleExecution (
   selected: Command | undefined,
   devID: string,
   arrayedMessage: string[],
+  pocketbase: Pocketbase
 ) {
   if (selected && msg.channel.type === ChannelType.GuildText) { 
     if (selected.data.devMode) {
@@ -31,6 +34,6 @@ async function handleExecution (
         return;
       }
     }
-    await selected.execute(msg, msg.channel, arrayedMessage);
+    await selected.execute(msg, msg.channel, arrayedMessage, pocketbase);
   }
 }

@@ -1,15 +1,16 @@
 import Pocketbase, {ListResult} from "pocketbase";
 import { Settings } from "../types/settings.js";
 
-export async function addServer (pb: Pocketbase, serverID: string, settings?: Settings) {
-  const server = await fetchServerRecord(pb, serverID);
-  if (server.totalItems < 1) {
-    const nsfwfiltersettings = await createDefaultSettings(pb, settings);
-    await pb.collection("server").create({
-      serverid: serverID,
-      nsfwfiltersettings: nsfwfiltersettings.id,
-    });
-  }
+export async function addServer (
+  pb: Pocketbase,
+  serverID: string, 
+  settings?: Settings
+) {
+  const nsfwfiltersettings = await createDefaultSettings(pb, settings);
+  await pb.collection("server").create({
+    serverid: serverID,
+    nsfwfiltersettings: nsfwfiltersettings.id,
+  });
 }
 
 export async function setSettings (pb: Pocketbase, server: ListResult, setting: Settings) {
@@ -48,3 +49,11 @@ export async function fetchServerRecord (pb: Pocketbase, serverID: string) {
       filter: `serverid="${serverID}"`
     });
 }
+
+export default { 
+  fetchServerRecord, 
+  setSettings, 
+  getSettings, 
+  createDefaultSettings, 
+  addServer 
+};
