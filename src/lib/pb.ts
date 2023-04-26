@@ -1,12 +1,5 @@
 import Pocketbase from "pocketbase";
-type Settings = {
-  nsfwfiltersettings: {
-    enablensfwfilter?: boolean,
-    sexy_limit?: number,
-    hentai_limit?: number,
-    porn_limit?: number
-  }
-}
+import { Settings } from "../types/settings.js";
 
 export async function addServer (pb: Pocketbase, serverID: string, settings?: Settings) {
   const server = await fetchServerRecord(pb, serverID);
@@ -35,7 +28,7 @@ export async function getSettings (pb: Pocketbase, serverID: string) {
     .getOne(server.items[0].nsfwfiltersettings);
 }
 
-async function createDefaultSettings (pb: Pocketbase, setting?: Settings) {
+export async function createDefaultSettings (pb: Pocketbase, setting?: Settings) {
   const defaultSettings: Settings = {
     nsfwfiltersettings: {
       enablensfwfilter: false,
