@@ -31,9 +31,9 @@ function parseCommands (args: string[]) {
   const porn_limit = optionMatches.find(c => c[0] === "porn_limit");
   return {
     nsfwfiltersettings: {
-      sexy_limit: sexy_limit ? parseInt(sexy_limit[0], 10) : undefined,
-      hentai_limit: hentai_limit ? parseInt(hentai_limit[0], 10) : undefined,
-      porn_limit: porn_limit ? parseInt(porn_limit[0], 10) : undefined,
+      sexy_limit: sexy_limit ? parseInt(sexy_limit[1], 10) : undefined,
+      hentai_limit: hentai_limit ? parseInt(hentai_limit[1], 10) : undefined,
+      porn_limit: porn_limit ? parseInt(porn_limit[1], 10) : undefined,
       enablensfwfilter: isFilterEnabled ? true : false,
     }
   };
