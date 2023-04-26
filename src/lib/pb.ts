@@ -1,4 +1,4 @@
-import Pocketbase from "pocketbase";
+import Pocketbase, {ListResult} from "pocketbase";
 import { Settings } from "../types/settings.js";
 
 export async function addServer (pb: Pocketbase, serverID: string, settings?: Settings) {
@@ -12,8 +12,7 @@ export async function addServer (pb: Pocketbase, serverID: string, settings?: Se
   }
 }
 
-export async function setSettings (pb: Pocketbase, serverID: string, setting: Settings) {
-  const server = await fetchServerRecord(pb, serverID);
+export async function setSettings (pb: Pocketbase, server: ListResult, setting: Settings) {
   const nsfwsettingID = server.items[0].nsfwfiltersettings;
   if (server.totalItems >= 1) {
     await pb
@@ -22,8 +21,7 @@ export async function setSettings (pb: Pocketbase, serverID: string, setting: Se
   }
 }
 
-export async function getSettings (pb: Pocketbase, serverID: string) {
-  const server = await fetchServerRecord(pb, serverID);
+export async function getSettings (pb: Pocketbase, server: ListResult) {
   return await pb.collection("nsfwfiltersettings")
     .getOne(server.items[0].nsfwfiltersettings);
 }
@@ -43,7 +41,7 @@ export async function createDefaultSettings (pb: Pocketbase, setting?: Settings)
   return nsfwfiltersettings;
 }
 
-async function fetchServerRecord (pb: Pocketbase, serverID: string) {
+export async function fetchServerRecord (pb: Pocketbase, serverID: string) {
   return await pb
     .collection("server")
     .getList(1, 1, {
