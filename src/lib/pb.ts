@@ -28,7 +28,16 @@ export async function getSettings (pb: Pocketbase, server: ListResult) {
 }
 
 export async function createDefaultSettings (pb: Pocketbase, setting?: Settings) {
-  const defaultSettings: Settings = {
+  const nsfwfiltersettings = await pb
+    .collection("nsfwfiltersettings")
+    .create(
+      setting?.nsfwfiltersettings ?? returnDefaultSettings().nsfwfiltersettings
+    );
+  return nsfwfiltersettings;
+}
+
+export function returnDefaultSettings (): Settings {
+  return {
     nsfwfiltersettings: {
       enablensfwfilter: false,
       sexy_limit: 50,
@@ -36,10 +45,6 @@ export async function createDefaultSettings (pb: Pocketbase, setting?: Settings)
       porn_limit: 50,
     }
   };
-  const nsfwfiltersettings = await pb
-    .collection("nsfwfiltersettings")
-    .create(setting?.nsfwfiltersettings ?? defaultSettings.nsfwfiltersettings);
-  return nsfwfiltersettings;
 }
 
 export async function fetchServerRecord (pb: Pocketbase, serverID: string) {
