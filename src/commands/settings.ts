@@ -66,8 +66,6 @@ function parseCommands (args: string[]) {
   };
 }
 
-console.log(parseCommands(["--enable", ""]));
-
 function parseBooleans (booleanMatches: string[]) {
   const isFilterEnabled = booleanMatches.find(c => c === "--enablensfwfilter") ? true : undefined;
   const isFilterDisabled = booleanMatches.find(c => c === "--disablensfwfilter") ? false : undefined;
