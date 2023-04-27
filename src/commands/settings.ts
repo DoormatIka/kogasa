@@ -1,7 +1,8 @@
+import { Message } from "discord.js";
 import { Command } from "../types/command.js";
 import { parsee } from "../lib/parsee.js";
-import { Settings } from "../types/settings.js";
 import PB from "../lib/pb.js";
+import Pocketbase, {ListResult} from "pocketbase";
 
 export const command: Command = {
   data: { 
@@ -13,21 +14,32 @@ export const command: Command = {
   async execute (msg, channel, args, pb) {
     await msg.channel.sendTyping();
     const settings = parseCommands(args);
-    if (settings.errors.nsfwfilter) {
-      await msg.reply("Something went wrong parsing your command.");
-      return;
-    }
-
     const record = await PB.fetchServerRecord(pb, channel.guild.id);
     if (record.items.length < 1) {
       await PB.addServer(pb, channel.guild.id, settings);
-      await msg.reply(`Added ${JSON.stringify(settings.nsfwfiltersettings)} on ${channel.guild.id}`);
+      await msg.reply(`Added default settings on Guild #${channel.guild.id}.`);
     } else {
+      if (await argumentValidator(msg, args, pb, record)) {
+        return;
+      }
       await PB.setSettings(pb, record, settings);
-      await msg.reply(`Set ${JSON.stringify(settings.nsfwfiltersettings)} on ${channel.guild.id}`);
-    }
+      await msg.reply(`Set ${JSON.stringify(settings.nsfwfiltersettings)} on Guild #${channel.guild.id}`);
+    } 
   },
 };
+
+async function argumentValidator (
+  msg: Message, 
+  args: string[],
+  pb: Pocketbase,
+  server: ListResult
+) {
+  if (args.length < 1) {
+    const settings = await PB.getSettings(pb, server);
+    await msg.reply(`NSFW Filter: ${settings.enablensfwfilter ? "enabled" : "disabled"}\nHentai Limit: ${settings.hentai_limit}\nPorn Limit: ${settings.porn_limit}\nSexy Limit: ${settings.sexy_limit}`);
+    return true;
+  }
+}
 
 function parseCommands (args: string[]) {
   const { booleanMatches, optionMatches } = parsee(args);
@@ -57,6 +69,7 @@ function parseBooleans (booleanMatches: string[]) {
   };
 }
 
+// refractor
 function validateParameters (
   sexy_limit?: string[],
   hentai_limit?: string[], 

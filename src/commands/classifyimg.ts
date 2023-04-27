@@ -4,6 +4,7 @@ import tf from "@tensorflow/tfjs-node";
 import nsfw from "nsfwjs";
 import axios, {AxiosResponse} from "axios";
 import sharp from "sharp";
+import {fetchServerRecord, getSettings} from "../lib/pb.js";
 
 const model = await nsfw.load();
 
@@ -14,45 +15,49 @@ export const command: Command = {
     usage: "classifyimg {image}",
     devMode: true,
   },
-  async execute (msg) {
+  async execute (msg, channel, args, pb) {
     await msg.channel.sendTyping();
     const res = [];
+    const server = await fetchServerRecord(pb, channel.guildId);
+    if (server.items.length < 1) {
+      await msg.reply("Please do a `??nsfwsetting` to use this feature.");
+      return;
+    }
+
+    const settings = await getSettings(pb, server);
     if (msg.attachments.size >= 1) {
       res.push(...await attachmentClassifier(msg));
     }
-    if (msg.embeds.length >= 1) {
-      res.push(...await embedClassifier(msg));
-    }
-    await msg.reply(`Res: ${res.join("\n\n")} | Sent attachments: ${msg.attachments.size}`);
+    const ifExplicit = await comparePredictionsToLimit(settings, res);
+    await msg.reply(`ifExplicit: ${ifExplicit} | Sent attachments: ${msg.attachments.size}`);
   },
 };
-
-async function attachmentClassifier (msg: Message) {
-  const axiosBuffers = await getAttachments(msg);
-  const responses = await handleAxiosResponseClassification(axiosBuffers);
-  return responses.flatMap((c, i) => {
-    return `Attachment ${i}: ${c.map(c => `${c.className} => ${c.probability * 100}`).join("\n")}`;
-  });
-}
-
-async function embedClassifier (msg: Message) {
-  const axiosBuffers = await getEmbeds(msg);
-  const responses = await handleAxiosResponseClassification(axiosBuffers);
-  return responses.flatMap((c, i) => {
-    return `Embed ${i}: ${c.map(c => `${c.className} => ${c.probability * 100}`).join("\n")}`;
-  });
-}
-
-function getEmbeds (msg: Message) {
-  const axiosPromises = [];
-  for (const embed of msg.embeds) {
-    if (embed.image) {
-      if (embed.thumbnail) {
-        axiosPromises.push(axios(embed.thumbnail.url, { responseType: "arraybuffer" }));
+/* eslint-disable */
+async function comparePredictionsToLimit (
+  settings: Record<string, string>, 
+  imagePredictions: nsfw.predictionType[][]
+) {
+  console.log(imagePredictions);
+  console.log(settings);
+  for (const imagePrediction of imagePredictions) {
+    for (const prediction of imagePrediction) {
+      if (prediction.className === "Hentai" && prediction.probability > parseInt(settings.hentai_limit, 10) / 100) {
+        return true;
+      }
+      if (prediction.className === "Porn" && prediction.probability > parseInt(settings.porn_limit, 10) / 100) {
+        return true;
+      }
+      if (prediction.className === "Sexy" && prediction.probability > parseInt(settings.sexy_limit, 10) / 100) {
+        return true;
       }
     }
   }
-  return Promise.all(axiosPromises);
+  return false;
+}
+/* eslint-enable */
+async function attachmentClassifier (msg: Message) {
+  const axiosBuffers = await getAttachments(msg);
+  return await handleAxiosResponseClassification(axiosBuffers);
 }
 
 function getAttachments (msg: Message) {
@@ -63,7 +68,9 @@ function getAttachments (msg: Message) {
   return Promise.all(axiosPromises);
 }
 
-function handleAxiosResponseClassification<T> (axiosBuffers: Array<AxiosResponse<Buffer, T>>) { 
+function handleAxiosResponseClassification<T> (
+  axiosBuffers: Array<AxiosResponse<Buffer, T>>,
+) { 
   const classifyPromises = [];
   for (const res of axiosBuffers) {
     classifyPromises.push(handleImageClassification(res.data));
@@ -72,7 +79,9 @@ function handleAxiosResponseClassification<T> (axiosBuffers: Array<AxiosResponse
 }
 
 
-async function handleImageClassification (image: Buffer) {
+async function handleImageClassification (
+  image: Buffer, 
+) {
   const resizedImage = sharp(image)
     .resize({ width: 800, fit: sharp.fit.inside })
     .jpeg({ quality: 80 });
