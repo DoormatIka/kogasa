@@ -1,12 +1,13 @@
 import { Command } from "../types/command.js";
 import { parsee } from "../lib/parsee.js";
+import { Settings } from "../types/settings.js";
 import PB from "../lib/pb.js";
 
 export const command: Command = {
   data: { 
     name: "nsfwsetting",
     description: "Sets the NSFW filter. (Not working yet.)",
-    usage: "nsfwsetting [--enablensfw|--disablensfw] [sexy_limit:number] [hentai_limit:number] [porn_limit:number]",
+    usage: "nsfwsetting [--enablensfwfilter|--disablensfwfilter] [sexy_limit:number] [hentai_limit:number] [porn_limit:number]",
     devMode: true,
   },
   async execute (msg, channel, args, pb) {
@@ -28,11 +29,9 @@ export const command: Command = {
   },
 };
 
-function parseCommands (args: string[]) { 
+function parseCommands (args: string[]) {
   const { booleanMatches, optionMatches } = parsee(args);
-  const isFilterDisabled = booleanMatches.find(c => c === "--enablensfw") ? true : false;
-  const isFilterEnabled = booleanMatches.find(c => c === "--disablensfw") ? true : false; // bugged.
-
+  const { enableFilter } = parseBooleans(booleanMatches);
   const sexy_limit = optionMatches.find(c => c[0] === "sexy_limit");
   const hentai_limit = optionMatches.find(c => c[0] === "hentai_limit");
   const porn_limit = optionMatches.find(c => c[0] === "porn_limit");
@@ -41,11 +40,20 @@ function parseCommands (args: string[]) {
       sexy_limit: sexy_limit ? parseInt(sexy_limit[1], 10) : undefined,
       hentai_limit: hentai_limit ? parseInt(hentai_limit[1], 10) : undefined,
       porn_limit: porn_limit ? parseInt(porn_limit[1], 10) : undefined,
-      enablensfwfilter: isFilterEnabled || isFilterDisabled,
+      enablensfwfilter: enableFilter,
     },
     errors: {
       nsfwfilter: validateParameters(sexy_limit, hentai_limit, porn_limit)
     }
+  };
+}
+
+function parseBooleans (booleanMatches: string[]) {
+  const isFilterEnabled = booleanMatches.find(c => c === "--enablensfwfilter") ? true : undefined;
+  const isFilterDisabled = booleanMatches.find(c => c === "--disablensfwfilter") ? false : undefined;
+
+  return {
+    enableFilter: isFilterEnabled ?? isFilterDisabled
   };
 }
 
