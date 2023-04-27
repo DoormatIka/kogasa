@@ -1,6 +1,6 @@
 
 export type Settings = {
-  nsfwfiltersettings: {
+  nsfwfiltersettings?: {
     enablensfwfilter?: boolean,
     sexy_limit?: number,
     hentai_limit?: number,

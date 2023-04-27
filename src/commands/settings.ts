@@ -47,18 +47,26 @@ function parseCommands (args: string[]) {
   const sexy_limit = optionMatches.find(c => c[0] === "sexy_limit");
   const hentai_limit = optionMatches.find(c => c[0] === "hentai_limit");
   const porn_limit = optionMatches.find(c => c[0] === "porn_limit");
-  return {
-    nsfwfiltersettings: {
+  
+  let nsfwfiltersettings;
+  if (sexy_limit || hentai_limit || porn_limit) {
+    nsfwfiltersettings = {
       sexy_limit: sexy_limit ? parseInt(sexy_limit[1], 10) : undefined,
       hentai_limit: hentai_limit ? parseInt(hentai_limit[1], 10) : undefined,
       porn_limit: porn_limit ? parseInt(porn_limit[1], 10) : undefined,
       enablensfwfilter: enableFilter,
-    },
+    };
+  }
+
+  return {
+    nsfwfiltersettings: nsfwfiltersettings,
     errors: {
       nsfwfilter: validateParameters(sexy_limit, hentai_limit, porn_limit)
     }
   };
 }
+
+console.log(parseCommands(["--enable", ""]));
 
 function parseBooleans (booleanMatches: string[]) {
   const isFilterEnabled = booleanMatches.find(c => c === "--enablensfwfilter") ? true : undefined;

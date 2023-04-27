@@ -28,33 +28,30 @@ export const command: Command = {
     if (msg.attachments.size >= 1) {
       res.push(...await attachmentClassifier(msg));
     }
-    const ifExplicit = await comparePredictionsToLimit(settings, res);
+    const ifExplicit = await comparePredictionsToLimit(
+      res, settings.hentai_limit, settings.porn_limit,
+      settings.sexy_limit
+    );
     await msg.reply(`ifExplicit: ${ifExplicit} | Sent attachments: ${msg.attachments.size}`);
   },
 };
-/* eslint-disable */
+
 async function comparePredictionsToLimit (
-  settings: Record<string, string>, 
-  imagePredictions: nsfw.predictionType[][]
+  imagePredictions: nsfw.predictionType[][],
+  hentai_limit: number, porn_limit: number, sexy_limit: number
 ) {
   console.log(imagePredictions);
-  console.log(settings);
   for (const imagePrediction of imagePredictions) {
-    for (const prediction of imagePrediction) {
-      if (prediction.className === "Hentai" && prediction.probability > parseInt(settings.hentai_limit, 10) / 100) {
-        return true;
-      }
-      if (prediction.className === "Porn" && prediction.probability > parseInt(settings.porn_limit, 10) / 100) {
-        return true;
-      }
-      if (prediction.className === "Sexy" && prediction.probability > parseInt(settings.sexy_limit, 10) / 100) {
-        return true;
-      }
+    const isHentaiAboveLimit = imagePrediction.some(p => p.className === "Hentai" && (p.probability > (hentai_limit / 100)));
+    const isPornAboveLimit = imagePrediction.some(p => p.className === "Porn" && (p.probability > (porn_limit / 100)));
+    const isSexyAboveLimit = imagePrediction.some(p => p.className === "Sexy" && (p.probability > (sexy_limit / 100)));
+    if (isPornAboveLimit || isSexyAboveLimit || isHentaiAboveLimit) {
+      return true;
     }
   }
   return false;
 }
-/* eslint-enable */
+
 async function attachmentClassifier (msg: Message) {
   const axiosBuffers = await getAttachments(msg);
   return await handleAxiosResponseClassification(axiosBuffers);
