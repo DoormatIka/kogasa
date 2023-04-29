@@ -13,7 +13,7 @@ export const command: Command = {
   },
   async execute (msg, channel, args, pb) {
     await msg.channel.sendTyping();
-    const settings = parseCommands(args);
+    const settings = parseNSFWSettings(args);
     const record = await PB.fetchServerRecord(pb, channel.guild.id);
     if (record.items.length < 1) {
       await PB.addServer(pb, channel.guild.id, settings);
@@ -41,9 +41,9 @@ async function argumentValidator (
   }
 }
 
-function parseCommands (args: string[]) {
+export function parseNSFWSettings (args: string[]) {
   const { booleanMatches, optionMatches } = parsee(args);
-  const { enableFilter } = parseBooleans(booleanMatches);
+  const enableFilter = parseNSFWSettingBooleans(booleanMatches);
   const sexy_limit = optionMatches.find(c => c[0] === "sexy_limit");
   const hentai_limit = optionMatches.find(c => c[0] === "hentai_limit");
   const porn_limit = optionMatches.find(c => c[0] === "porn_limit");
@@ -61,22 +61,19 @@ function parseCommands (args: string[]) {
   return {
     nsfwfiltersettings: nsfwfiltersettings,
     errors: {
-      nsfwfilter: validateParameters(sexy_limit, hentai_limit, porn_limit)
+      nsfwfilter: isValidParameters(sexy_limit, hentai_limit, porn_limit)
     }
   };
 }
 
-function parseBooleans (booleanMatches: string[]) {
+export function parseNSFWSettingBooleans (booleanMatches: string[]) {
   const isFilterEnabled = booleanMatches.find(c => c === "--enablensfwfilter") ? true : undefined;
   const isFilterDisabled = booleanMatches.find(c => c === "--disablensfwfilter") ? false : undefined;
-
-  return {
-    enableFilter: isFilterEnabled ?? isFilterDisabled
-  };
+  return isFilterEnabled ?? isFilterDisabled;
 }
 
 // refractor
-function validateParameters (
+function isValidParameters (
   sexy_limit?: string[],
   hentai_limit?: string[], 
   porn_limit?: string[]
@@ -90,4 +87,5 @@ function validateParameters (
   if (porn_limit && parseInt(porn_limit[1]) > 100) {
     return true;
   }
+  return false;
 }

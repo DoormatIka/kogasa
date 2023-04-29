@@ -3,10 +3,10 @@ import { Settings } from "../types/settings.js";
 
 export async function addServer (
   pb: Pocketbase,
-  serverID: string, 
+  serverID: string,
   settings?: Settings
 ) {
-  const nsfwfiltersettings = await createDefaultSettings(pb, settings);
+  const nsfwfiltersettings = await createSettings(pb, settings);
   await pb.collection("server").create({
     serverid: serverID,
     nsfwfiltersettings: nsfwfiltersettings.id,
@@ -27,7 +27,7 @@ export async function getSettings (pb: Pocketbase, server: ListResult) {
     .getOne(server.items[0].nsfwfiltersettings);
 }
 
-export async function createDefaultSettings (pb: Pocketbase, setting?: Settings) {
+export async function createSettings (pb: Pocketbase, setting?: Settings) {
   const nsfwfiltersettings = await pb
     .collection("nsfwfiltersettings")
     .create(
@@ -59,6 +59,6 @@ export default {
   fetchServerRecord, 
   setSettings, 
   getSettings, 
-  createDefaultSettings, 
+  createSettings, 
   addServer 
 };
