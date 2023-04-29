@@ -1,1 +1,1 @@
-https://github.com/farzher/fuzzysort - fuzzy search for commands
+refractor (by order of severity first): commands/settings.ts => commands/classifyimg.ts => lib/pb.ts
