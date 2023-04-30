@@ -5,33 +5,36 @@
   * @param cmd - discord command
   * @returns
   *   - booleanMatches => a string[] that has every enable options
-  *   - optionMatches => a string[][] that has every option and their parameters
+  *   - optionMatches => a Map that has every option and their parameters
   */
-export function parsee (args: string[]): { booleanMatches: string[], optionMatches: string[][] } {
-  const optionMatches: string[][] = [];
-  const booleanMatches: string[] = [];
+export function parsee (args: string[]) {
+  const options = new Map<string, string>();
+  const booleans: string[] = [];
   for (let index = 0; index < args.length; index++) {
     const parse = args[index];
-    parseBooleanAndOption(parse, optionMatches, booleanMatches);
+    const boolean = processBoolean(parse);
+    if (!boolean) {
+      const option = processOption(parse);
+      if (option) {
+        options.set(option[0], option[1]);
+      }
+      continue;
+    }
+    booleans.push(parse);
   }
-
-  return {
-    booleanMatches, optionMatches
-  };
+  return { options, booleans };
 }
 
-function parseBooleanAndOption (
-  parse: string, 
-  optionMatches: string[][], 
-  booleanMatches: string[]
-) { 
-  const booleanMatch = parse.match("--");
-  if (!booleanMatch) {
-    const splittedOptionMatches = parse.split(":");
-    if (splittedOptionMatches.length === 2) {
-      optionMatches.push(splittedOptionMatches);
-    }
-    return;
+function processBoolean (parse: string) {
+  return parse.match(/--\w+/);
+}
+function processOption (parse: string) {
+  const splitOptions = parse.split(":");
+  if (
+    splitOptions.length === 2 &&
+    splitOptions[0] !== "" &&
+    splitOptions[1] !== ""
+  ) {
+    return splitOptions;
   }
-  booleanMatches.push(parse);
 }
