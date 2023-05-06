@@ -2,5 +2,9 @@ node_modules
 .env
 package-lock.json
 .vim
-data
-db/*
+data/models
+data/letty.jpg
+db/pb_data
+db/CHANGELOG.md
+db/LICENSE.md
+db/pocketbase.exe

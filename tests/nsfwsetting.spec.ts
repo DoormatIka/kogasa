@@ -1,65 +1,39 @@
 import assert from "assert";
 import { describe } from "node:test";
-import {parseNSFWSettings, parseNSFWSettingBooleans} from "../src/commands/nsfwsetting.js";
+import {parseOptionSettings} from "../src/commands/nsfwsetting.js";
 import { parsee } from "../src/lib/parsee.js";
-
-
-const args = ["--enablensfwfilter", "sexy_limit:60", "", "hentai_limit:800"];
 
 describe("NSFW Parsing", function () {
   testParsee();
-  testParseNSFWSettings(args);
-  testNSFWSettingBooleans();
+  nsfwSettingParser();
 });
 
 function testParsee () {  
   describe("parsee", function () {
     it("should parse the string array into their own separate options", function () { 
+      const args = ["--enable", "angelic:phase", "aa:", "--", ":a", "aaaa"];
       const parsed = parsee(args);
+      const predictedOptions = new Map();
+      predictedOptions.set("angelic", "phase");
       assert.deepStrictEqual(parsed, {
-        booleanMatches: ["--enablensfwfilter"],
-        optionMatches: [["sexy_limit", "60"], ["hentai_limit", "800"]]
+        options: predictedOptions,
+        booleans: ["--enable"]
       });
     });
   });
 }
 
-function testParseNSFWSettings (args: string[]) { 
-  describe("parseNSFWSettings", function () {
-    it("should parse the nsfw_limit, sexy_limit, etc.. into their own parameters", function () {
-      const parsed = parseNSFWSettings(args);
-      assert.deepEqual(parsed, {
-        nsfwfiltersettings: {
-          enablensfwfilter: true,
-          hentai_limit: 800,
-          sexy_limit: 60,
-          porn_limit: undefined,
-        },
-        errors: {
-          nsfwfilter: true
-        }
+function nsfwSettingParser () {
+  describe("nsfw setting parser", function () {
+    it("should have limit params and boolean | Normal", function () {
+      const args = ["--enablensfwfilter", "--disablensfwfilter", "sexy_limit:0", "hentai_limit:0"];
+      const parsed = parseOptionSettings(args);
+      assert.deepStrictEqual(parsed, {
+        enablensfwfilter: true,
+        sexy_limit: 0,
+        hentai_limit: 0,
+        porn_limit: undefined,
       });
-    });
-  });
-}
-
-function testNSFWSettingBooleans () {
-  describe("parseNSFWSettingBooleans", function () {
-    it("should return true for both --enablensfwfilter & --disablensfwfilter combined", function () {
-      const booleans = parseNSFWSettingBooleans(["--enablensfwfilter", "--disablensfwfilter"]);
-      assert.strictEqual(booleans, true);
-    });
-    it("should return false for --disablensfwfilter", function () {
-      const booleans = parseNSFWSettingBooleans(["--disablensfwfilter"]);
-      assert.strictEqual(booleans, false);
-    });
-    it("should return true for --enablensfwfilter", function () {
-      const booleans = parseNSFWSettingBooleans(["--enablensfwfilter"]);
-      assert.strictEqual(booleans, true);
-    });
-    it("should return undefined", function () {
-      const booleans = parseNSFWSettingBooleans([]);
-      assert.strictEqual(booleans, undefined);
     });
   });
 }

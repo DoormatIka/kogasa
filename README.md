@@ -8,7 +8,8 @@ Current Features:
 
 ### Dependencies:
 - Visual Studio 2017 Build Tools
-- Pocketbase
+- Pocketbase, inside `/db/`.
+- .env on root. TOKEN= , DEVID= , PREFIX= ,
 
 ## Notes:
 Branches are named like this:

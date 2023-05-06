@@ -13,17 +13,17 @@ export const command: Command = {
   },
   async execute (msg, channel, args, pb) {
     await msg.channel.sendTyping();
-    const settings = parseNSFWSettings(args);
+    const settings = parseOptionSettings(args);
     const record = await PB.fetchServerRecord(pb, channel.guild.id);
     if (record.items.length < 1) {
-      await PB.addServer(pb, channel.guild.id, settings);
+      await PB.addServer(pb, channel.guild.id, { nsfwfiltersettings: settings });
       await msg.reply(`Added default settings on Guild #${channel.guild.id}.`);
     } else {
       if (await argumentValidator(msg, args, pb, record)) {
         return;
       }
-      await PB.setSettings(pb, record, settings);
-      await msg.reply(`Set ${JSON.stringify(settings.nsfwfiltersettings)} on Guild #${channel.guild.id}`);
+      await PB.setSettings(pb, record, { nsfwfiltersettings: settings });
+      await msg.reply(`Set ${JSON.stringify(settings)} on Guild #${channel.guild.id}`);
     } 
   },
 };
@@ -41,51 +41,18 @@ async function argumentValidator (
   }
 }
 
-export function parseNSFWSettings (args: string[]) {
-  const { booleanMatches, optionMatches } = parsee(args);
-  const enableFilter = parseNSFWSettingBooleans(booleanMatches);
-  const sexy_limit = optionMatches.find(c => c[0] === "sexy_limit");
-  const hentai_limit = optionMatches.find(c => c[0] === "hentai_limit");
-  const porn_limit = optionMatches.find(c => c[0] === "porn_limit");
-  
-  let nsfwfiltersettings;
-  if (sexy_limit || hentai_limit || porn_limit) {
-    nsfwfiltersettings = {
-      sexy_limit: sexy_limit ? parseInt(sexy_limit[1], 10) : undefined,
-      hentai_limit: hentai_limit ? parseInt(hentai_limit[1], 10) : undefined,
-      porn_limit: porn_limit ? parseInt(porn_limit[1], 10) : undefined,
-      enablensfwfilter: enableFilter,
-    };
-  }
+export function parseOptionSettings (args: string[]) {
+  const parsed = parsee(args);
+  const sexy_limit = parsed.options.get("sexy_limit");
+  const hentai_limit = parsed.options.get("hentai_limit");
+  const porn_limit = parsed.options.get("porn_limit");
+  const enablensfwfilter = parsed.booleans.some((str) => str === "--enablensfwfilter");
+  const disablensfwfilter = parsed.booleans.some((str) => str === "--disablensfwfilter");
 
   return {
-    nsfwfiltersettings: nsfwfiltersettings,
-    errors: {
-      nsfwfilter: isValidParameters(sexy_limit, hentai_limit, porn_limit)
-    }
+    enablensfwfilter: enablensfwfilter ?? disablensfwfilter,
+    sexy_limit: sexy_limit ? parseInt(sexy_limit, 10) : undefined,
+    hentai_limit: hentai_limit ? parseInt(hentai_limit, 10) : undefined,
+    porn_limit: porn_limit ? parseInt(porn_limit, 10) : undefined,
   };
-}
-
-export function parseNSFWSettingBooleans (booleanMatches: string[]) {
-  const isFilterEnabled = booleanMatches.find(c => c === "--enablensfwfilter") ? true : undefined;
-  const isFilterDisabled = booleanMatches.find(c => c === "--disablensfwfilter") ? false : undefined;
-  return isFilterEnabled ?? isFilterDisabled;
-}
-
-// refractor
-function isValidParameters (
-  sexy_limit?: string[],
-  hentai_limit?: string[], 
-  porn_limit?: string[]
-) {
-  if (sexy_limit && parseInt(sexy_limit[1]) > 100) {
-    return true;
-  }
-  if (hentai_limit && parseInt(hentai_limit[1]) > 100) {
-    return true;
-  }
-  if (porn_limit && parseInt(porn_limit[1]) > 100) {
-    return true;
-  }
-  return false;
 }
